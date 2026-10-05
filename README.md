@@ -1,51 +1,77 @@
 # Lagos Life Sim 🌍
 
-A realistic life-simulation and social multiplayer game concept set in Lagos, Nigeria. This project is the MVP foundation for a gameplay experience focused on city exploration, social interactions, work and study, money management, betting, property ownership, and personal progression.
+A realistic multiplayer life-simulation and social game set in Lagos, Nigeria. Players create a character, explore city districts, make friends, earn money, study, travel, place bets, and build an empire.
 
-## Highlights
+## Project status
 
-- Welcome screen and immersive Lagos city feel
-- Character creation and life progression
-- District map exploration and travel flow
-- Nearby player discovery and social interactions
-- Chat, friend requests, money transfers, image uploads, and social animations
-- Betting system with stake amounts and odds
-- Realistic daily life loops: work, study, bills, property, and business growth
+This project now includes:
 
-## Recommended stack
+- Frontend landing page and city-life dashboard
+- Character creator and travel-screen flow
+- Social interaction and live chat prototype
+- Betting and wallet panel
+- Real-time backend foundation with Socket.io
+- API routes for game data and health checks
+- Full-stack starter structure for further expansion
 
-- Frontend: Next.js + Tailwind CSS
-- 3D visuals: Three.js / React Three Fiber
+## Stack
+
+- Frontend: Next.js + React + Tailwind CSS
 - Real-time: Socket.io
-- Backend: Node.js + Express/Fastify
-- Database: PostgreSQL
-- Cache: Redis
+- Backend: Node.js + Express
+- Database: PostgreSQL-ready structure
+- Environment: Node + dotenv
 
-## Local setup
+## Run locally
 
 ```bash
 npm install
 npm run dev
 ```
 
-Then open http://localhost:3000
+This will start:
+- the Next.js frontend on http://localhost:3000
+- the Express + Socket.io backend on http://localhost:4000
 
-## Current MVP scope
+## Included features
 
-- Landing page
-- Character / life-status dashboard
-- Lagos city map selector
-- Travel and transport flow
-- Nearby player cards
-- Chat interface
-- Betting panel with odds
-- Social action buttons for meeting, flirting, and gifting
+- Welcome screen
+- Character creation workflow
+- Lagos map and travels
+- Nearby players and social actions
+- Chat and photo upload UI
+- Betting panel with odds and payouts
+- Daily life and economy cards
+- Real-time backend routes for future multiplayer systems
 
-## Next steps
+## Folder overview
 
-- Add user authentication
-- Add persistent player profiles
-- Add real-time Socket.io chat
-- Add betting backend and database models
-- Add more realistic 3D movement and animations
-- Add map rendering, property systems, and task loops
+```text
+lagos-life-sim/
+├── app/
+│   ├── api/
+│   ├── globals.css
+│   ├── layout.tsx
+│   └── page.tsx
+├── backend/
+│   └── src/
+│       ├── server.js
+│       └── gameData.js
+├── public/
+│   └── lagos-skyline.svg
+├── .env.example
+├── package.json
+├── README.md
+└── next.config.mjs
+```
+
+## Next major features to build
+
+- Real PostgreSQL database models
+- User auth and player saves
+- Real-time multiplayer chat rooms
+- Property and business ownership system
+- Health, energy, and education states
+- More advanced 3D environment with Three.js
+- Matchmaking and social events
+- Secure betting backend and settlement logic
