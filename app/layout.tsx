@@ -1,6 +1,21 @@
-import type { Metadata } from 'next';
+import "./globals.css";
+import GameApp from "./game";
 
-export const metadata: Metadata = {
-  title: 'Lagos Life Sim',
-  description: 'A realistic multi-player life sim set in Lagos, Nigeria.',
+export const metadata = {
+  title: "Lagos Life Sim",
+  description: "Realistic multiplayer life simulation game set in Lagos, Nigeria.",
 };
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="en">
+      <body>
+        <GameApp />
+      </body>
+    </html>
+  );
+}

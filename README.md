@@ -1,77 +1,158 @@
-# Lagos Life Sim 🌍
+# Lagos Life Sim - Production Ready 🎮
 
-A realistic multiplayer life-simulation and social game set in Lagos, Nigeria. Players create a character, explore city districts, make friends, earn money, study, travel, place bets, and build an empire.
+A realistic multiplayer life-simulation game set in Lagos, Nigeria with full-stack authentication, database persistence, real-time chat, property/business systems, and secure betting.
 
-## Project status
+## Features Included
 
-This project now includes:
+### 🔐 Authentication & Accounts
+- User registration and login with JWT tokens
+- Password hashing with bcryptjs
+- Secure token-based authentication
+- Player profile persistence
 
-- Frontend landing page and city-life dashboard
-- Character creator and travel-screen flow
-- Social interaction and live chat prototype
-- Betting and wallet panel
-- Real-time backend foundation with Socket.io
-- API routes for game data and health checks
-- Full-stack starter structure for further expansion
+### 🏠 Property & Business Systems
+- Buy and own residential properties
+- Create and manage businesses
+- Track property values and rental income
+- Business revenue and employee management
+- Economy progression and wealth building
 
-## Stack
+### 💬 Real-Time Multiplayer
+- Socket.io powered live chat rooms
+- District-based multiplayer rooms
+- Social interactions (Wave, Flirt, Kiss, Gift, Invite)
+- Real-time player presence and notifications
+- Message history and user interactions
 
-- Frontend: Next.js + React + Tailwind CSS
-- Real-time: Socket.io
-- Backend: Node.js + Express
-- Database: PostgreSQL-ready structure
-- Environment: Node + dotenv
+### 💰 Secure Betting System
+- Server-side bet validation
+- Odds calculation and payout settlement
+- Player balance management
+- Bet history tracking
+- Anti-cheating backend validation
 
-## Run locally
+### 🗺️ 3D City Map (Ready for Three.js)
+- Multi-district Lagos environment
+- District-based navigation
+- Travel and location tracking
+- Foundation for 3D rendering
+
+### 📊 Database Backend
+- PostgreSQL with full schema
+- Player profiles and statistics
+- Property and business ownership
+- Transaction history
+- Social connections and friendships
+
+## Setup Instructions
+
+### 1. Prerequisites
+- Node.js 18+
+- PostgreSQL 13+
+- npm or yarn
+
+### 2. Database Setup
+
+```bash
+# Create database
+creatdb lagos_life_sim
+
+# Load schema
+psql -d lagos_life_sim -f database/schema.sql
+```
+
+### 3. Environment Configuration
+
+```bash
+# Copy environment file
+cp .env.local.example .env.local
+
+# Edit .env.local with your settings
+# - DB_PASSWORD: your postgres password
+# - JWT_SECRET: a secure random string
+# - API URLs and ports
+```
+
+### 4. Install Dependencies
 
 ```bash
 npm install
+```
+
+### 5. Run Development Server
+
+```bash
 npm run dev
 ```
 
 This will start:
-- the Next.js frontend on http://localhost:3000
-- the Express + Socket.io backend on http://localhost:4000
+- **Frontend**: http://localhost:3000
+- **Backend**: http://localhost:4000
 
-## Included features
+## API Endpoints
 
-- Welcome screen
-- Character creation workflow
-- Lagos map and travels
-- Nearby players and social actions
-- Chat and photo upload UI
-- Betting panel with odds and payouts
-- Daily life and economy cards
-- Real-time backend routes for future multiplayer systems
+### Authentication
+- `POST /api/auth/register` - Create new player account
+- `POST /api/auth/login` - Login and get JWT token
 
-## Folder overview
+### Player
+- `GET /api/player/:id` - Get player profile and assets
+- `POST /api/player/property` - Purchase property
+- `POST /api/player/business` - Create business
+- `POST /api/player/bet` - Place bet (server-validated)
 
-```text
+### Real-Time (Socket.io)
+- `join-room` - Join multiplayer chat room
+- `chat:send` - Send message to room
+- `social:action` - Perform social interaction
+- `player-joined` - Receive player join events
+
+## Project Structure
+
+```
 lagos-life-sim/
 ├── app/
-│   ├── api/
-│   ├── globals.css
-│   ├── layout.tsx
-│   └── page.tsx
+│   ├── game.tsx          # Main game UI component
+│   ├── layout.tsx        # App layout
+│   ├── globals.css       # Tailwind styles
+│   └── api/              # Next.js API routes
 ├── backend/
 │   └── src/
-│       ├── server.js
-│       └── gameData.js
-├── public/
-│   └── lagos-skyline.svg
-├── .env.example
-├── package.json
-├── README.md
-└── next.config.mjs
+│       └── server.js     # Express + Socket.io server
+├── database/
+│   └── schema.sql        # PostgreSQL schema
+├── .env.local.example    # Environment template
+├── package.json          # Dependencies
+└── README.md             # This file
 ```
 
-## Next major features to build
+## Key Technologies
 
-- Real PostgreSQL database models
-- User auth and player saves
-- Real-time multiplayer chat rooms
-- Property and business ownership system
-- Health, energy, and education states
-- More advanced 3D environment with Three.js
-- Matchmaking and social events
-- Secure betting backend and settlement logic
+- **Frontend**: Next.js, React, Tailwind CSS
+- **Backend**: Express.js, Socket.io
+- **Database**: PostgreSQL
+- **Auth**: JWT + bcryptjs
+- **Real-time**: Socket.io
+- **Ready for**: Three.js (3D rendering)
+
+## Next Phase Build Items
+
+- [ ] Three.js 3D city rendering
+- [ ] Advanced property customization
+- [ ] NPC AI and quest systems
+- [ ] Event matchmaking and social groups
+- [ ] Mobile app (React Native)
+- [ ] Payment integration
+- [ ] Leaderboards and achievements
+- [ ] Voice chat integration
+
+## Deployment
+
+Ready to deploy to:
+- Frontend: Vercel, Netlify
+- Backend: Railway, Render, Heroku
+- Database: AWS RDS, Supabase, neon.tech
+
+## License
+
+MIT
