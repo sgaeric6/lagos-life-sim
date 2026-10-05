@@ -1,516 +1,398 @@
-"use client";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-import { ChangeEvent, useMemo, useState } from "react";
-
-type District = {
-  name: string;
-  vibe: string;
-  wealth: string;
-  tags: string[];
-};
-
-type Player = {
-  name: string;
-  status: string;
-  mood: string;
-  distance: string;
-  action: string;
-  accent: string;
-};
-
-type Message = {
-  user: string;
-  text: string;
-  time: string;
-  tone: "mine" | "them";
-};
-
-const districts: District[] = [
-  { name: "Victoria Island", vibe: "Corporate energy", wealth: "High net worth", tags: ["Finance", "Night life", "Beach"] },
-  { name: "Lekki", vibe: "Luxury living", wealth: "Premium", tags: ["Residences", "Mall", "Yatch club"] },
-  { name: "Ikoyi", vibe: "Elite district", wealth: "Affluent", tags: ["Schools", "Culture", "Events"] },
-  { name: "Yaba", vibe: "Creative heartbeat", wealth: "Startup", tags: ["Campus", "Tech", "Coffee"] },
-  { name: "Surulere", vibe: "Community living", wealth: "Balanced", tags: ["Market", "Transport", "Food"] },
-  { name: "Ikeja", vibe: "Metro core", wealth: "Commercial", tags: ["Transit", "Offices", "Shopping"] },
-];
-
-const nearbyPlayers: Player[] = [
-  { name: "Ada C.", status: "Nearby", mood: "Looking for a coffee meetup", distance: "0.4 km", action: "Chat", accent: "from-pink-400 to-violet-500" },
-  { name: "Kunle B.", status: "At the gym", mood: "Freshly worked out", distance: "0.9 km", action: "Friend", accent: "from-emerald-400 to-cyan-500" },
-  { name: "Zainab T.", status: "At the mall", mood: "Shopping && exploring", distance: "1.2 km", action: "Meet", accent: "from-amber-400 to-orange-500" },
-];
-
-const transportOptions = [
-  { name: "Keke", duration: "12 min", price: "₦2,500", energy: "-5" },
-  { name: "Taxi", duration: "9 min", price: "₦7,000", energy: "-4" },
-  { name: "Bus", duration: "18 min", price: "₦1,500", energy: "-3" },
-  { name: "Plane", duration: "38 min", price: "₦45,000", energy: "-8" },
-];
-
-const initialMessages: Message[] = [
-  { user: "Ada", text: "You should come to the beach tonight. It’s popping.", time: "Now", tone: "them" },
-  { user: "You", text: "I’m on my way. Need a quick workout first.", time: "1m ago", tone: "mine" },
-  { user: "Kunle", text: "Let’s do a business meetup after work.", time: "3m ago", tone: "them" },
-];
-
-const betMarkets = [
-  { label: "Match winner", odds: 2.4 },
-  { label: "Daily hustle", odds: 1.9 },
-  { label: "Beach meetup", odds: 3.1 },
-  { label: "Property flip", odds: 4.2 },
-];
-
-const socialActions = ["Wave", "Flirt", "Kiss", "Gift", "Invite"];
-
-export default function Home() {
-  const [selectedDistrict, setSelectedDistrict] = useState(districts[0]);
-  const [selectedTransport, setSelectedTransport] = useState(transportOptions[0]);
-  const [betAmount, setBetAmount] = useState(25000);
-  const [selectedOdds, setSelectedOdds] = useState(betMarkets[0]);
-  const [messages, setMessages] = useState(initialMessages);
-  const [chatInput, setChatInput] = useState("");
-  const [selectedPlayer, setSelectedPlayer] = useState(nearbyPlayers[0]);
-  const [selectedAction, setSelectedAction] = useState("Wave");
-  const [betResult, setBetResult] = useState("Stake live and win big.");
-  const [previewImage, setPreviewImage] = useState<string | null>(null);
-  const [kissBurst, setKissBurst] = useState(false);
-
-  const potentialWin = useMemo(() => Math.round(betAmount * selectedOdds.odds), [betAmount, selectedOdds]);
-
-  const addMessage = () => {
-    if (!chatInput.trim()) return;
-    setMessages((prev) => [
-      ...prev,
-      { user: "You", text: chatInput.trim(), time: "Now", tone: "mine" },
-    ]);
-    setChatInput("");
-  };
-
-  const handleSocialAction = (action: string) => {
-    setSelectedAction(action);
-
-    const message =
-      action === "Kiss"
-        ? `You gave ${selectedPlayer.name} a warm kiss in public.`
-        : action === "Flirt"
-          ? `You flirted with ${selectedPlayer.name} by the boulevard.`
-          : action === "Gift"
-            ? `You sent ${selectedPlayer.name} a thoughtful gift.`
-            : action === "Invite"
-              ? `You invited ${selectedPlayer.name} to a rooftop hangout.`
-              : `You waved at ${selectedPlayer.name} and started a conversation.`;
-
-    setMessages((prev) => [
-      { user: "You", text: message, time: "Now", tone: "mine" },
-      ...prev,
-    ].slice(0, 6));
-
-    if (action === "Kiss") {
-      setKissBurst(true);
-      setTimeout(() => setKissBurst(false), 1200);
-    }
-  };
-
-  const handlePlaceBet = () => {
-    const won = Math.random() > 0.45;
-    const amountWon = won ? potentialWin : 0;
-    setBetResult(
-      won
-        ? `You won ₦${amountWon.toLocaleString()} and uploaded the celebration!`
-        : `You lost the stake. Try a safer pick next round.`
-    );
-
-    setMessages((prev) => [
-      { user: "System", text: won ? "Bet settled: winnings credited." : "Bet settled: stake lost.", time: "Now", tone: "them" },
-      ...prev,
-    ].slice(0, 6));
-  };
-
-  const handleImageUpload = (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    const imageUrl = URL.createObjectURL(file);
-    setPreviewImage(imageUrl);
-    setMessages((prev) => [
-      { user: "You", text: "Shared a photo from the city scene.", time: "Now", tone: "mine" },
-      ...prev,
-    ].slice(0, 6));
-  };
-
-  return (
-    <main className="min-h-screen bg-[#07131f] text-white">
-      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-        <header className="mb-6 rounded-full border border-white/10 bg-white/5 px-5 py-3 backdrop-blur-xl">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-cyan-500 text-lg font-black text-slate-950 shadow-glow">
-                L
-              </div>
-              <div>
-                <p className="text-lg font-semibold">Lagos Life Sim</p>
-                <p className="text-xs text-slate-300">Real-life city simulation</p>
-              </div>
-            </div>
-
-            <nav className="hidden items-center gap-6 text-sm text-slate-200 md:flex">
-              <a href="#explore">Explore</a>
-              <a href="#social">Social</a>
-              <a href="#economy">Economy</a>
-              <a href="#bets">Bets</a>
-            </nav>
-
-            <div className="flex items-center gap-3">
-              <div className="rounded-full bg-emerald-500/10 px-3 py-1 text-xs text-emerald-300">
-                Balance: ₦1,250,000
-              </div>
-              <button className="rounded-full bg-gradient-to-r from-emerald-400 to-cyan-400 px-4 py-2 text-sm font-semibold text-slate-950 shadow-glow">
-                Play now
-              </button>
-            </div>
-          </div>
-        </header>
-
-        <section className="grid gap-6 lg:grid-cols-[1.35fr_0.65fr]">
-          <div className="relative overflow-hidden rounded-[32px] border border-emerald-400/30 bg-city-glow bg-[#0a1827] p-7 shadow-glow">
-            <div className="absolute -right-12 -top-12 h-56 w-56 rounded-full bg-emerald-400/15 blur-3xl" />
-            <div className="absolute -bottom-12 left-10 h-48 w-48 rounded-full bg-cyan-500/10 blur-3xl" />
-
-            <div className="relative z-10">
-              <div className="mb-5 flex flex-wrap gap-2">
-                <span className="rounded-full border border-emerald-400/35 bg-emerald-500/10 px-2.5 py-1 text-[10px] uppercase tracking-[0.2em] text-emerald-300">
-                  Welcome to Lagos
-                </span>
-                <span className="rounded-full border border-cyan-400/35 bg-cyan-500/10 px-2.5 py-1 text-[10px] uppercase tracking-[0.2em] text-cyan-300">
-                  Real-time multiplayer
-                </span>
-              </div>
-
-              <h1 className="max-w-lg text-4xl font-black leading-tight sm:text-5xl">
-                Build a life, meet people, and own the city.
-              </h1>
-
-              <p className="mt-4 max-w-xl text-base text-slate-300">
-                Live as a resident in Lagos. Work, study, travel, flirt, build businesses, place smart bets, and grow your legacy across the city’s districts.
-              </p>
-
-              <div className="mt-6 flex flex-wrap gap-3">
-                <button className="rounded-full bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 px-6 py-3 font-semibold text-slate-950 transition hover:scale-[1.02]">
-                  Create character
-                </button>
-                <button className="rounded-full border border-white/15 bg-white/5 px-6 py-3 font-semibold text-white transition hover:border-emerald-300/50 hover:bg-emerald-500/5">
-                  View map
-                </button>
-              </div>
-
-              <div className="mt-8 grid gap-4 sm:grid-cols-3">
-                {[
-                  { label: "Players online", value: "12,840" },
-                  { label: "Areas unlocked", value: "18" },
-                  { label: "Empire value", value: "₦84.2M" },
-                ].map((stat) => (
-                  <div key={stat.label} className="rounded-2xl border border-white/10 bg-slate-950/30 p-4">
-                    <p className="text-xs uppercase tracking-[0.2em] text-slate-400">{stat.label}</p>
-                    <p className="mt-2 text-2xl font-bold">{stat.value}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className="overflow-hidden rounded-[32px] border border-white/10 bg-gradient-to-b from-slate-900 to-slate-950">
-            <div className="h-52 bg-[radial-gradient(circle_at_center,_rgba(59,130,246,0.4),_transparent_40%),linear-gradient(180deg,_rgba(10,88,102,0.8),_rgba(7,19,31,1))] p-4">
-              <div className="relative h-full">
-                <img src="/lagos-skyline.svg" alt="Lagos skyline" className="h-40 w-full object-cover opacity-90" />
-                <div className="absolute right-4 top-4 h-20 w-20 rounded-full border border-emerald-300/60 bg-emerald-400/20 blur-sm" />
-              </div>
-            </div>
-
-            <div className="space-y-4 p-5">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Current life</p>
-                  <p className="mt-1 text-xl font-bold">Freelance designer</p>
-                </div>
-                <span className="rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs text-emerald-300">+₦24k / day</span>
-              </div>
-
-              <div className="character-scene">
-                <div className="character-avatar">
-                  <div className="character-head" />
-                  <div className="character-body" />
-                  <div className="character-arm character-arm-left" />
-                  <div className="character-arm character-arm-right" />
-                  <div className="character-leg character-leg-left" />
-                  <div className="character-leg character-leg-right" />
-                </div>
-              </div>
-
-              <div className="grid gap-3 sm:grid-cols-2">
-                <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
-                  <p className="text-xs text-slate-400">Energy</p>
-                  <p className="mt-2 text-xl font-bold text-amber-300">82%</p>
-                </div>
-                <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
-                  <p className="text-xs text-slate-400">Health</p>
-                  <p className="mt-2 text-xl font-bold text-rose-300">91%</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section id="explore" className="mt-8 grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-          <div className="rounded-[30px] border border-white/10 bg-slate-900/80 p-5">
-            <div className="mb-5 flex items-center justify-between">
-              <div>
-                <p className="text-xs uppercase tracking-[0.2em] text-slate-400">City map</p>
-                <h2 className="mt-1 text-2xl font-bold">Explore Lagos</h2>
-              </div>
-              <button className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-200">
-                Travel history
-              </button>
-            </div>
-
-            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-              {districts.map((district) => (
-                <button
-                  key={district.name}
-                  onClick={() => setSelectedDistrict(district)}
-                  className={`cursor-pointer rounded-2xl border p-4 text-left transition ${
-                    selectedDistrict.name === district.name
-                      ? "border-emerald-400/60 bg-emerald-500/10 shadow-glow"
-                      : "border-white/10 bg-slate-950/40 hover:border-white/20"
-                  }`}
-                >
-                  <p className="text-lg font-semibold">{district.name}</p>
-                  <p className="mt-2 text-sm text-slate-300">{district.vibe}</p>
-                  <div className="mt-3 flex flex-wrap gap-1.5">
-                    {district.tags.map((tag) => (
-                      <span key={tag} className="rounded-full bg-slate-800 px-2 py-1 text-[10px] tracking-wide text-slate-200">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="rounded-[30px] border border-white/10 bg-slate-900/80 p-5">
-            <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Travel</p>
-            <h3 className="mt-1 text-2xl font-bold">Select destination</h3>
-
-            <div className="mt-5 rounded-2xl border border-emerald-400/30 bg-emerald-500/10 p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs uppercase tracking-[0.2em] text-emerald-100/80">Destination</p>
-                  <p className="mt-2 text-xl font-bold">{selectedDistrict.name}</p>
-                </div>
-                <span className="rounded-full bg-slate-950/40 px-2 py-1 text-xs text-emerald-200">{selectedDistrict.wealth}</span>
-              </div>
-            </div>
-
-            <div className="mt-5 space-y-3">
-              {transportOptions.map((option) => (
-                <button
-                  key={option.name}
-                  onClick={() => setSelectedTransport(option)}
-                  className={`flex w-full items-center justify-between rounded-2xl border p-3 text-left transition ${
-                    selectedTransport.name === option.name
-                      ? "border-cyan-400/60 bg-cyan-500/10"
-                      : "border-white/10 bg-slate-950/40 hover:border-white/20"
-                  }`}
-                >
-                  <div>
-                    <p className="font-semibold">{option.name}</p>
-                    <p className="text-sm text-slate-400">{option.duration}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-semibold text-emerald-200">{option.price}</p>
-                    <p className="text-xs text-slate-400">energy {option.energy}</p>
-                  </div>
-                </button>
-              ))}
-            </div>
-
-            <button className="mt-5 w-full rounded-full bg-gradient-to-r from-cyan-400 to-emerald-400 px-4 py-3 font-semibold text-slate-950">
-              Travel to {selectedDistrict.name}
-            </button>
-          </div>
-        </section>
-
-        <section id="economy" className="mt-8 grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
-          <div className="rounded-[30px] border border-white/10 bg-slate-900/80 p-5">
-            <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Life systems</p>
-            <h3 className="mt-1 text-2xl font-bold">Run your daily life</h3>
-
-            <div className="mt-5 space-y-3">
-              {[
-                { name: "Work", value: "Graphic design", amount: "+₦34,000" },
-                { name: "Study", value: "Business admin", amount: "School fee: ₦80k" },
-                { name: "Property", value: "2-bedroom flat", amount: "Value: ₦10.5M" },
-                { name: "Business", value: "Cafe branch", amount: "+₦58,000" },
-              ].map((entry) => (
-                <div key={entry.name} className="flex items-center justify-between rounded-2xl border border-white/10 bg-slate-950/40 p-3">
-                  <div>
-                    <p className="font-semibold">{entry.name}</p>
-                    <p className="text-sm text-slate-400">{entry.value}</p>
-                  </div>
-                  <span className="rounded-full bg-emerald-500/10 px-2 py-1 text-xs text-emerald-300">{entry.amount}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div id="bets" className="rounded-[30px] border border-amber-400/30 bg-gradient-to-br from-amber-500/10 via-slate-900 to-slate-950 p-5">
-            <p className="text-xs uppercase tracking-[0.2em] text-amber-200/80">Betting & stakes</p>
-            <h3 className="mt-1 text-2xl font-bold">Stake your money</h3>
-
-            <div className="mt-5 grid gap-3 sm:grid-cols-2">
-              {betMarkets.map((market) => (
-                <button
-                  key={market.label}
-                  onClick={() => setSelectedOdds(market)}
-                  className={`rounded-2xl border p-3 text-left transition ${
-                    selectedOdds.label === market.label
-                      ? "border-amber-300 bg-amber-500/10"
-                      : "border-white/10 bg-slate-950/40 hover:border-white/20"
-                  }`}
-                >
-                  <p className="text-sm text-slate-300">{market.label}</p>
-                  <p className="mt-2 text-2xl font-bold text-amber-200">{market.odds.toFixed(1)}x</p>
-                </button>
-              ))}
-            </div>
-
-            <div className="mt-5 rounded-2xl border border-white/10 bg-slate-950/60 p-4">
-              <div className="flex items-center justify-between">
-                <label className="text-sm text-slate-300">Stake amount</label>
-                <span className="text-xs uppercase tracking-[0.2em] text-amber-200">Cash</span>
-              </div>
-
-              <div className="mt-3 flex items-center gap-3">
-                <input
-                  type="number"
-                  value={betAmount}
-                  onChange={(e) => setBetAmount(Number(e.target.value) || 0)}
-                  className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-lg font-semibold text-white outline-none"
-                />
-                <span className="text-sm text-slate-300">₦</span>
-              </div>
-
-              <div className="mt-4 flex items-center justify-between rounded-xl bg-amber-500/10 px-3 py-2 text-sm text-amber-100">
-                <span>Potential win</span>
-                <span className="font-bold">₦{potentialWin.toLocaleString()}</span>
-              </div>
-
-              <div className="mt-4 rounded-xl border border-amber-300/30 bg-amber-500/5 px-3 py-2 text-sm text-amber-100">
-                {betResult}
-              </div>
-
-              <button onClick={handlePlaceBet} className="mt-4 w-full rounded-full bg-gradient-to-r from-amber-300 to-orange-400 px-4 py-3 font-semibold text-slate-950">
-                Place bet
-              </button>
-            </div>
-          </div>
-        </section>
-
-        <section id="social" className="mt-8 grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
-          <div className="rounded-[30px] border border-white/10 bg-slate-900/80 p-5">
-            <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Nearby players</p>
-            <h3 className="mt-1 text-2xl font-bold">Meet new people</h3>
-
-            <div className="mt-5 space-y-3">
-              {nearbyPlayers.map((player) => (
-                <button
-                  key={player.name}
-                  onClick={() => setSelectedPlayer(player)}
-                  className={`flex w-full items-center justify-between rounded-2xl border p-3 text-left transition ${
-                    selectedPlayer.name === player.name
-                      ? "border-emerald-400/60 bg-emerald-500/10"
-                      : "border-white/10 bg-slate-950/40 hover:border-white/20"
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className={`flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br ${player.accent} font-bold text-white`}>
-                      {player.name.charAt(0)}
-                    </div>
-                    <div>
-                      <p className="font-semibold">{player.name}</p>
-                      <p className="text-xs text-slate-400">{player.status} • {player.distance}</p>
-                    </div>
-                  </div>
-                  <span className="rounded-full border border-emerald-400/40 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-200">
-                    {player.action}
-                  </span>
-                </button>
-              ))}
-            </div>
-
-            <div className="mt-5 rounded-2xl border border-pink-400/30 bg-pink-500/10 p-4">
-              <p className="text-sm text-pink-100">Relationship vibe with {selectedPlayer.name}</p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {socialActions.map((action) => (
-                  <button onClick={() => handleSocialAction(action)} key={action} className={`rounded-full border px-3 py-1.5 text-xs ${selectedAction === action ? "border-pink-300 bg-pink-500/20 text-pink-50" : "border-pink-300/30 bg-white/5 text-pink-100"}`}>
-                    {action}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {kissBurst && (
-              <div className="kiss-burst">
-                <span>💋</span>
-                <span>💖</span>
-                <span>✨</span>
-              </div>
-            )}
-          </div>
-
-          <div className="rounded-[30px] border border-white/10 bg-slate-900/80 p-5">
-            <div className="mb-5 flex items-center justify-between">
-              <div>
-                <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Live chat</p>
-                <h3 className="mt-1 text-2xl font-bold">City conversations</h3>
-              </div>
-              <label className="cursor-pointer rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-200">
-                Upload image
-                <input className="hidden" type="file" accept="image/*" onChange={handleImageUpload} />
-              </label>
-            </div>
-
-            <div className="space-y-3 rounded-2xl border border-white/10 bg-slate-950/40 p-3">
-              {messages.map((message, index) => (
-                <div key={`${message.user}-${index}`} className={`flex ${message.tone === "mine" ? "justify-end" : "justify-start"}`}>
-                  <div className={`max-w-[80%] rounded-2xl px-3 py-2 ${message.tone === "mine" ? "bg-emerald-500/15 text-emerald-100" : "bg-slate-800 text-slate-100"}`}>
-                    <p className="mb-1 text-[10px] uppercase tracking-[0.2em] text-slate-300">{message.user} • {message.time}</p>
-                    <p>{message.text}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {previewImage && (
-              <div className="mt-4 overflow-hidden rounded-2xl border border-white/10 bg-slate-950/40">
-                <img src={previewImage} alt="Uploaded chat preview" className="h-44 w-full object-cover" />
-              </div>
-            )}
-
-            <div className="mt-4 flex gap-2">
-              <input
-                value={chatInput}
-                onChange={(e) => setChatInput(e.target.value)}
-                placeholder="Send a message to the city..."
-                className="flex-1 rounded-full border border-white/10 bg-white/5 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-400"
-              />
-              <button onClick={addMessage} className="rounded-full bg-gradient-to-r from-emerald-400 to-cyan-400 px-5 py-3 font-semibold text-slate-950">
-                Send
-              </button>
-            </div>
-          </div>
-        </section>
-      </div>
-    </main>
-  );
+:root {
+  color-scheme: dark;
 }
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top, rgba(34, 197, 94, 0.18), transparent 25%),
+    radial-gradient(circle at bottom, rgba(14, 165, 233, 0.18), transparent 30%),
+    #07131f;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+::selection {
+  background: rgba(16, 185, 129, 0.4);
+}
+
+.game-shell {
+  background-image: radial-gradient(circle at top, rgba(45, 212, 191, 0.14), transparent 20%), radial-gradient(circle at right, rgba(59, 130, 246, 0.12), transparent 35%);
+}
+
+.panel {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(15, 23, 42, 0.8);
+  border-radius: 30px;
+  box-shadow: 0 18px 40px rgba(2, 6, 23, 0.45);
+}
+
+.hero-panel {
+  border-color: rgba(45, 212, 191, 0.3);
+  background: radial-gradient(circle at top, rgba(16, 185, 129, 0.08), rgba(15, 23, 42, 0.88));
+}
+
+.logo-mark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #34d399, #22d3ee);
+  color: #05131f;
+  font-size: 1.25rem;
+  font-weight: 900;
+  box-shadow: 0 0 30px rgba(45, 212, 191, 0.55);
+}
+
+.primary-button,
+.secondary-button,
+.ghost-button,
+.nav-button {
+  transition: 0.2s ease;
+}
+
+.primary-button {
+  border-radius: 9999px;
+  background: linear-gradient(135deg, #34d399, #22d3ee);
+  color: #07131f;
+  padding: 0.8rem 1.4rem;
+  font-weight: 800;
+  box-shadow: 0 0 30px rgba(45, 212, 191, 0.35);
+}
+
+.primary-button:hover,
+.secondary-button:hover,
+.ghost-button:hover,
+.nav-button:hover {
+  transform: translateY(-1px);
+}
+
+.primary-button.small {
+  padding: 0.6rem 1rem;
+  font-size: 0.8rem;
+}
+
+.secondary-button {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgb(255, 255, 255);
+  border-radius: 9999px;
+  padding: 0.8rem 1.4rem;
+  font-weight: 700;
+}
+
+.ghost-button {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgb(255, 255, 255);
+  border-radius: 9999px;
+  padding: 0.5rem 0.9rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.nav-button {
+  color: rgba(255, 255, 255, 0.8);
+  background: transparent;
+  border: none;
+  padding: 0.2rem 0.1rem;
+}
+
+.pill {
+  border-radius: 9999px;
+  border: 1px solid rgba(45, 212, 191, 0.35);
+  background: rgba(16, 185, 129, 0.1);
+  color: rgba(153, 246, 228, 1);
+  padding: 0.42rem 0.8rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.pill.soft {
+  border-color: rgba(96, 165, 250, 0.3);
+  background: rgba(59, 130, 246, 0.08);
+  color: rgba(191, 219, 254, 1);
+}
+
+.pill.success {
+  border-color: rgba(52, 211, 153, 0.35);
+  background: rgba(52, 211, 153, 0.08);
+  color: rgba(167, 243, 208, 1);
+  letter-spacing: 0.08em;
+  text-transform: none;
+}
+
+.eyebrow {
+  font-size: 0.68rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(148, 163, 184, 1);
+}
+
+.section-title {
+  margin-top: 0.25rem;
+  font-size: clamp(1.5rem, 2vw, 2rem);
+  font-weight: 800;
+}
+
+.section-title.small {
+  font-size: clamp(1.2rem, 1.6vw, 1.8rem);
+}
+
+.district-tile,
+.district-card {
+  border-radius: 1.2rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(2, 6, 23, 0.35);
+  padding: 1rem;
+  text-align: left;
+  color: white;
+  transition: 0.2s ease;
+}
+
+.district-tile.active,
+.district-card.active,
+.transport-row.active,
+.bet-card.active {
+  border-color: rgba(45, 212, 191, 0.6);
+  background: rgba(16, 185, 129, 0.08);
+  box-shadow: 0 0 25px rgba(45, 212, 191, 0.18);
+}
+
+.transport-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(2, 6, 23, 0.35);
+  padding: 0.85rem 1rem;
+  text-align: left;
+  color: white;
+  transition: 0.2s ease;
+}
+
+.bet-card {
+  border-radius: 1.2rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(2, 6, 23, 0.4);
+  padding: 0.9rem 1rem;
+  text-align: left;
+  color: white;
+  transition: 0.2s ease;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 9999px;
+  background: rgba(148, 163, 184, 0.12);
+  color: rgba(226, 232, 240, 1);
+  padding: 0.3rem 0.55rem;
+  font-size: 0.62rem;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.chip.soft {
+  background: rgba(14, 165, 233, 0.1);
+  color: rgba(191, 219, 254, 1);
+}
+
+.chip.success {
+  background: rgba(16, 185, 129, 0.12);
+  color: rgba(187, 247, 208, 1);
+}
+
+.character-scene {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 170px;
+  margin-top: 10px;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(180deg, rgba(14, 116, 144, 0.28), rgba(2, 6, 23, 0.7));
+  overflow: hidden;
+}
+
+.character-scene.large {
+  height: 260px;
+}
+
+.character-scene::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(45, 212, 191, 0.18), transparent 38%);
+}
+
+.character-avatar {
+  position: relative;
+  width: 130px;
+  height: 130px;
+  animation: floatCharacter 2.8s ease-in-out infinite;
+}
+
+.character-head {
+  position: absolute;
+  left: 50%;
+  top: 10px;
+  width: 46px;
+  height: 46px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: linear-gradient(180deg, #f7d2ab, #ddab7d);
+  box-shadow: inset 0 -4px 8px rgba(0, 0, 0, 0.12);
+}
+
+.character-body {
+  position: absolute;
+  left: 50%;
+  top: 54px;
+  width: 58px;
+  height: 54px;
+  transform: translateX(-50%);
+  border-radius: 18px 18px 12px 12px;
+  background: linear-gradient(180deg, #1fd6b2, #0c8a9e);
+  box-shadow: 0 12px 25px rgba(16, 185, 129, 0.32);
+}
+
+.character-arm,
+.character-leg {
+  position: absolute;
+  background: linear-gradient(180deg, #f2c79b, #dca266);
+  border-radius: 999px;
+}
+
+.character-arm-left {
+  left: 26px;
+  top: 58px;
+  width: 12px;
+  height: 42px;
+  transform: rotate(22deg);
+}
+
+.character-arm-right {
+  right: 26px;
+  top: 58px;
+  width: 12px;
+  height: 42px;
+  transform: rotate(-22deg);
+}
+
+.character-leg-left {
+  left: 44px;
+  top: 102px;
+  width: 14px;
+  height: 34px;
+}
+
+.character-leg-right {
+  right: 44px;
+  top: 102px;
+  width: 14px;
+  height: 34px;
+}
+
+.kiss-burst {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 18px;
+  height: 45px;
+  font-size: 24px;
+  animation: burstUp 1.1s ease-out forwards;
+}
+
+.kiss-burst span {
+  display: inline-block;
+  animation: pop 0.7s ease-out both;
+}
+
+.kiss-burst span:nth-child(2) {
+  animation-delay: 0.12s;
+}
+
+.kiss-burst span:nth-child(3) {
+  animation-delay: 0.22s;
+}
+
+.city-map-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 0.9rem;
+}
+
+@keyframes floatCharacter {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes burstUp {
+  0% {
+    opacity: 0;
+    transform: translateY(12px) scale(0.8);
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-20px) scale(1.1);
+  }
+}
+
+@keyframes pop {
+  0% {
+    transform: scale(0.5) translateY(10px);
+  }
+  60% {
+    transform: scale(1.3) translateY(-8px);
+  }
+  100% {
+    transform: scale(1) translateY(0);
+  }
+}
+
+@media (max-width: 768px) {
+  .pill {
+    letter-spacing: 0.08em;
+  }
+}
+
