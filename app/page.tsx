@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { ChangeEvent, useMemo, useState } from "react";
 
 type District = {
   name: string;
@@ -15,6 +15,7 @@ type Player = {
   mood: string;
   distance: string;
   action: string;
+  accent: string;
 };
 
 type Message = {
@@ -34,9 +35,9 @@ const districts: District[] = [
 ];
 
 const nearbyPlayers: Player[] = [
-  { name: "Ada C.", status: "Nearby", mood: "Looking for a coffee meetup", distance: "0.4 km", action: "Chat" },
-  { name: "Kunle B.", status: "At the gym", mood: "Freshly worked out", distance: "0.9 km", action: "Friend" },
-  { name: "Zainab T.", status: "At the mall", mood: "Shopping & exploring", distance: "1.2 km", action: "Meet" },
+  { name: "Ada C.", status: "Nearby", mood: "Looking for a coffee meetup", distance: "0.4 km", action: "Chat", accent: "from-pink-400 to-violet-500" },
+  { name: "Kunle B.", status: "At the gym", mood: "Freshly worked out", distance: "0.9 km", action: "Friend", accent: "from-emerald-400 to-cyan-500" },
+  { name: "Zainab T.", status: "At the mall", mood: "Shopping && exploring", distance: "1.2 km", action: "Meet", accent: "from-amber-400 to-orange-500" },
 ];
 
 const transportOptions = [
@@ -59,6 +60,8 @@ const betMarkets = [
   { label: "Property flip", odds: 4.2 },
 ];
 
+const socialActions = ["Wave", "Flirt", "Kiss", "Gift", "Invite"];
+
 export default function Home() {
   const [selectedDistrict, setSelectedDistrict] = useState(districts[0]);
   const [selectedTransport, setSelectedTransport] = useState(transportOptions[0]);
@@ -66,6 +69,11 @@ export default function Home() {
   const [selectedOdds, setSelectedOdds] = useState(betMarkets[0]);
   const [messages, setMessages] = useState(initialMessages);
   const [chatInput, setChatInput] = useState("");
+  const [selectedPlayer, setSelectedPlayer] = useState(nearbyPlayers[0]);
+  const [selectedAction, setSelectedAction] = useState("Wave");
+  const [betResult, setBetResult] = useState("Stake live and win big.");
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [kissBurst, setKissBurst] = useState(false);
 
   const potentialWin = useMemo(() => Math.round(betAmount * selectedOdds.odds), [betAmount, selectedOdds]);
 
@@ -78,13 +86,65 @@ export default function Home() {
     setChatInput("");
   };
 
+  const handleSocialAction = (action: string) => {
+    setSelectedAction(action);
+
+    const message =
+      action === "Kiss"
+        ? `You gave ${selectedPlayer.name} a warm kiss in public.`
+        : action === "Flirt"
+          ? `You flirted with ${selectedPlayer.name} by the boulevard.`
+          : action === "Gift"
+            ? `You sent ${selectedPlayer.name} a thoughtful gift.`
+            : action === "Invite"
+              ? `You invited ${selectedPlayer.name} to a rooftop hangout.`
+              : `You waved at ${selectedPlayer.name} and started a conversation.`;
+
+    setMessages((prev) => [
+      { user: "You", text: message, time: "Now", tone: "mine" },
+      ...prev,
+    ].slice(0, 6));
+
+    if (action === "Kiss") {
+      setKissBurst(true);
+      setTimeout(() => setKissBurst(false), 1200);
+    }
+  };
+
+  const handlePlaceBet = () => {
+    const won = Math.random() > 0.45;
+    const amountWon = won ? potentialWin : 0;
+    setBetResult(
+      won
+        ? `You won ₦${amountWon.toLocaleString()} and uploaded the celebration!`
+        : `You lost the stake. Try a safer pick next round.`
+    );
+
+    setMessages((prev) => [
+      { user: "System", text: won ? "Bet settled: winnings credited." : "Bet settled: stake lost.", time: "Now", tone: "them" },
+      ...prev,
+    ].slice(0, 6));
+  };
+
+  const handleImageUpload = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const imageUrl = URL.createObjectURL(file);
+    setPreviewImage(imageUrl);
+    setMessages((prev) => [
+      { user: "You", text: "Shared a photo from the city scene.", time: "Now", tone: "mine" },
+      ...prev,
+    ].slice(0, 6));
+  };
+
   return (
     <main className="min-h-screen bg-[#07131f] text-white">
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         <header className="mb-6 rounded-full border border-white/10 bg-white/5 px-5 py-3 backdrop-blur-xl">
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-cyan-500 text-lg font-bold text-slate-950">
+              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-cyan-500 text-lg font-black text-slate-950 shadow-glow">
                 L
               </div>
               <div>
@@ -104,7 +164,7 @@ export default function Home() {
               <div className="rounded-full bg-emerald-500/10 px-3 py-1 text-xs text-emerald-300">
                 Balance: ₦1,250,000
               </div>
-              <button className="rounded-full bg-gradient-to-r from-emerald-400 to-cyan-400 px-4 py-2 text-sm font-semibold text-slate-950">
+              <button className="rounded-full bg-gradient-to-r from-emerald-400 to-cyan-400 px-4 py-2 text-sm font-semibold text-slate-950 shadow-glow">
                 Play now
               </button>
             </div>
@@ -112,54 +172,57 @@ export default function Home() {
         </header>
 
         <section className="grid gap-6 lg:grid-cols-[1.35fr_0.65fr]">
-          <div className="rounded-[32px] border border-emerald-400/30 bg-city-glow bg-[#0a1827] p-7 shadow-glow">
-            <div className="mb-5 flex flex-wrap gap-2">
-              <span className="rounded-full border border-emerald-400/35 bg-emerald-500/10 px-2.5 py-1 text-[10px] uppercase tracking-[0.2em] text-emerald-300">
-                Welcome to Lagos
-              </span>
-              <span className="rounded-full border border-cyan-400/35 bg-cyan-500/10 px-2.5 py-1 text-[10px] uppercase tracking-[0.2em] text-cyan-300">
-                Real-time multiplayer
-              </span>
-            </div>
+          <div className="relative overflow-hidden rounded-[32px] border border-emerald-400/30 bg-city-glow bg-[#0a1827] p-7 shadow-glow">
+            <div className="absolute -right-12 -top-12 h-56 w-56 rounded-full bg-emerald-400/15 blur-3xl" />
+            <div className="absolute -bottom-12 left-10 h-48 w-48 rounded-full bg-cyan-500/10 blur-3xl" />
 
-            <h1 className="max-w-lg text-4xl font-black leading-tight sm:text-5xl">
-              Build a life, meet people, and own the city.
-            </h1>
+            <div className="relative z-10">
+              <div className="mb-5 flex flex-wrap gap-2">
+                <span className="rounded-full border border-emerald-400/35 bg-emerald-500/10 px-2.5 py-1 text-[10px] uppercase tracking-[0.2em] text-emerald-300">
+                  Welcome to Lagos
+                </span>
+                <span className="rounded-full border border-cyan-400/35 bg-cyan-500/10 px-2.5 py-1 text-[10px] uppercase tracking-[0.2em] text-cyan-300">
+                  Real-time multiplayer
+                </span>
+              </div>
 
-            <p className="mt-4 max-w-xl text-base text-slate-300">
-              Live as a resident in Lagos. Work, study, travel, flirt, build businesses, place smart bets, and grow your legacy across the city’s districts.
-            </p>
+              <h1 className="max-w-lg text-4xl font-black leading-tight sm:text-5xl">
+                Build a life, meet people, and own the city.
+              </h1>
 
-            <div className="mt-6 flex flex-wrap gap-3">
-              <button className="rounded-full bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 px-6 py-3 font-semibold text-slate-950 transition hover:scale-[1.02]">
-                Create character
-              </button>
-              <button className="rounded-full border border-white/15 bg-white/5 px-6 py-3 font-semibold text-white transition hover:border-emerald-300/50 hover:bg-emerald-500/5">
-                View map
-              </button>
-            </div>
+              <p className="mt-4 max-w-xl text-base text-slate-300">
+                Live as a resident in Lagos. Work, study, travel, flirt, build businesses, place smart bets, and grow your legacy across the city’s districts.
+              </p>
 
-            <div className="mt-8 grid gap-4 sm:grid-cols-3">
-              {[
-                { label: "Players online", value: "12,840" },
-                { label: "Areas unlocked", value: "18" },
-                { label: "Empire value", value: "₦84.2M" },
-              ].map((stat) => (
-                <div key={stat.label} className="rounded-2xl border border-white/10 bg-slate-950/30 p-4">
-                  <p className="text-xs uppercase tracking-[0.2em] text-slate-400">{stat.label}</p>
-                  <p className="mt-2 text-2xl font-bold">{stat.value}</p>
-                </div>
-              ))}
+              <div className="mt-6 flex flex-wrap gap-3">
+                <button className="rounded-full bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 px-6 py-3 font-semibold text-slate-950 transition hover:scale-[1.02]">
+                  Create character
+                </button>
+                <button className="rounded-full border border-white/15 bg-white/5 px-6 py-3 font-semibold text-white transition hover:border-emerald-300/50 hover:bg-emerald-500/5">
+                  View map
+                </button>
+              </div>
+
+              <div className="mt-8 grid gap-4 sm:grid-cols-3">
+                {[
+                  { label: "Players online", value: "12,840" },
+                  { label: "Areas unlocked", value: "18" },
+                  { label: "Empire value", value: "₦84.2M" },
+                ].map((stat) => (
+                  <div key={stat.label} className="rounded-2xl border border-white/10 bg-slate-950/30 p-4">
+                    <p className="text-xs uppercase tracking-[0.2em] text-slate-400">{stat.label}</p>
+                    <p className="mt-2 text-2xl font-bold">{stat.value}</p>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 
           <div className="overflow-hidden rounded-[32px] border border-white/10 bg-gradient-to-b from-slate-900 to-slate-950">
             <div className="h-52 bg-[radial-gradient(circle_at_center,_rgba(59,130,246,0.4),_transparent_40%),linear-gradient(180deg,_rgba(10,88,102,0.8),_rgba(7,19,31,1))] p-4">
-              <div className="flex h-full items-end justify-between">
-                <div className="w-full">
-                  <img src="/lagos-skyline.svg" alt="Lagos skyline" className="h-40 w-full object-cover opacity-90" />
-                </div>
-                <div className="absolute right-6 top-6 hidden h-24 w-24 rounded-full border border-emerald-300/60 bg-emerald-400/20 blur-sm md:block" />
+              <div className="relative h-full">
+                <img src="/lagos-skyline.svg" alt="Lagos skyline" className="h-40 w-full object-cover opacity-90" />
+                <div className="absolute right-4 top-4 h-20 w-20 rounded-full border border-emerald-300/60 bg-emerald-400/20 blur-sm" />
               </div>
             </div>
 
@@ -170,6 +233,17 @@ export default function Home() {
                   <p className="mt-1 text-xl font-bold">Freelance designer</p>
                 </div>
                 <span className="rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs text-emerald-300">+₦24k / day</span>
+              </div>
+
+              <div className="character-scene">
+                <div className="character-avatar">
+                  <div className="character-head" />
+                  <div className="character-body" />
+                  <div className="character-arm character-arm-left" />
+                  <div className="character-arm character-arm-right" />
+                  <div className="character-leg character-leg-left" />
+                  <div className="character-leg character-leg-right" />
+                </div>
               </div>
 
               <div className="grid gap-3 sm:grid-cols-2">
@@ -331,7 +405,11 @@ export default function Home() {
                 <span className="font-bold">₦{potentialWin.toLocaleString()}</span>
               </div>
 
-              <button className="mt-4 w-full rounded-full bg-gradient-to-r from-amber-300 to-orange-400 px-4 py-3 font-semibold text-slate-950">
+              <div className="mt-4 rounded-xl border border-amber-300/30 bg-amber-500/5 px-3 py-2 text-sm text-amber-100">
+                {betResult}
+              </div>
+
+              <button onClick={handlePlaceBet} className="mt-4 w-full rounded-full bg-gradient-to-r from-amber-300 to-orange-400 px-4 py-3 font-semibold text-slate-950">
                 Place bet
               </button>
             </div>
@@ -345,9 +423,17 @@ export default function Home() {
 
             <div className="mt-5 space-y-3">
               {nearbyPlayers.map((player) => (
-                <div key={player.name} className="flex items-center justify-between rounded-2xl border border-white/10 bg-slate-950/40 p-3">
+                <button
+                  key={player.name}
+                  onClick={() => setSelectedPlayer(player)}
+                  className={`flex w-full items-center justify-between rounded-2xl border p-3 text-left transition ${
+                    selectedPlayer.name === player.name
+                      ? "border-emerald-400/60 bg-emerald-500/10"
+                      : "border-white/10 bg-slate-950/40 hover:border-white/20"
+                  }`}
+                >
                   <div className="flex items-center gap-3">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-pink-400 to-violet-500 font-bold text-white">
+                    <div className={`flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br ${player.accent} font-bold text-white`}>
                       {player.name.charAt(0)}
                     </div>
                     <div>
@@ -355,23 +441,31 @@ export default function Home() {
                       <p className="text-xs text-slate-400">{player.status} • {player.distance}</p>
                     </div>
                   </div>
-                  <button className="rounded-full border border-emerald-400/40 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-200">
+                  <span className="rounded-full border border-emerald-400/40 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-200">
                     {player.action}
-                  </button>
-                </div>
+                  </span>
+                </button>
               ))}
             </div>
 
             <div className="mt-5 rounded-2xl border border-pink-400/30 bg-pink-500/10 p-4">
-              <p className="text-sm text-pink-100">Relationship vibe</p>
-              <div className="mt-3 flex gap-2">
-                {['Wave', 'Flirt', 'Kiss', 'Gift', 'Invite'].map((action) => (
-                  <button key={action} className="rounded-full border border-pink-300/30 bg-white/5 px-3 py-1.5 text-xs text-pink-100">
+              <p className="text-sm text-pink-100">Relationship vibe with {selectedPlayer.name}</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {socialActions.map((action) => (
+                  <button onClick={() => handleSocialAction(action)} key={action} className={`rounded-full border px-3 py-1.5 text-xs ${selectedAction === action ? "border-pink-300 bg-pink-500/20 text-pink-50" : "border-pink-300/30 bg-white/5 text-pink-100"}`}>
                     {action}
                   </button>
                 ))}
               </div>
             </div>
+
+            {kissBurst && (
+              <div className="kiss-burst">
+                <span>💋</span>
+                <span>💖</span>
+                <span>✨</span>
+              </div>
+            )}
           </div>
 
           <div className="rounded-[30px] border border-white/10 bg-slate-900/80 p-5">
@@ -380,9 +474,10 @@ export default function Home() {
                 <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Live chat</p>
                 <h3 className="mt-1 text-2xl font-bold">City conversations</h3>
               </div>
-              <button className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-200">
+              <label className="cursor-pointer rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-200">
                 Upload image
-              </button>
+                <input className="hidden" type="file" accept="image/*" onChange={handleImageUpload} />
+              </label>
             </div>
 
             <div className="space-y-3 rounded-2xl border border-white/10 bg-slate-950/40 p-3">
@@ -395,6 +490,12 @@ export default function Home() {
                 </div>
               ))}
             </div>
+
+            {previewImage && (
+              <div className="mt-4 overflow-hidden rounded-2xl border border-white/10 bg-slate-950/40">
+                <img src={previewImage} alt="Uploaded chat preview" className="h-44 w-full object-cover" />
+              </div>
+            )}
 
             <div className="mt-4 flex gap-2">
               <input
